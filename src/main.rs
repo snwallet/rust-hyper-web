@@ -10,7 +10,7 @@ async fn main() {
 
     let make_svc 
     = make_service_fn(|_conn| async {
-        Ok::<_, hyper::Error>(service_fn(controller::test_controller::echo))
+        Ok::<_, hyper::Error>(service_fn(controller::router_controller::router))
     });
 
     let server 

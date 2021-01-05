@@ -1,19 +1,33 @@
 use futures_util::TryStreamExt;
 //use hyper::service::{make_service_fn, service_fn};
-use hyper::{Body, Method, Request, Response, StatusCode};
+use hyper::{Body, Method, Request, Response, StatusCode, HeaderMap};
 
-pub async fn echo(req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
+use super::super::model::help_model;
+use hyper::header::CONTENT_TYPE;
+
+
+pub async fn router(req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
     let mut response = Response::new(Body::empty());
-
+    let mut headers = HeaderMap::new();
+    headers.insert(CONTENT_TYPE, "application/json; charset=utf-8".parse().unwrap());
     // 通过req.method()和req.uri().path()来识别方法和请求路径
     match (req.method(), req.uri().path()) {
         // (&Method::GET, "/") => {
         //     *response.body_mut() = Body::from("Try POSTing data to /echo");
         // },
-        (&Method::POST, "/echo") => {
+        // (&Method::POST, "/test") => {
+        //     // 将POST的内容保持不变返回
+        //     // println!("{:?}",&decode(str_1).unwrap()[..]);
+        //     println!("{:?}",req);
+        //     let _info1 = Info{id:1,name:"123".to_string()};
+        //     let info_str = serde_json::to_string(&_info1).unwrap();
+        //     *response.body_mut() = Body::from(info_str);
+        // },
+        (&Method::POST, "/get_token") => {
             // 将POST的内容保持不变返回
             println!("{:?}",req);
-            *response.body_mut() = req.into_body();
+            // *response.headers_mut() =
+            *response.body_mut() = Body::from(help_model::get_token());
         },
         (&Method::POST, "/echo/uppercase") => {
             // 把请求stream中的字母都变成大写，并返回
@@ -45,6 +59,7 @@ pub async fn echo(req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
             *response.body_mut() = Body::from("404");
         },
     };
+
 
     Ok(response)
 }
