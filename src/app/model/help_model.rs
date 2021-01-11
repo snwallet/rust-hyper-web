@@ -1,3 +1,6 @@
+#[deny(warnings)]
+
+
 use serde::{Serialize, Deserialize};
 
 use super::super::model::crypt_model;
@@ -8,7 +11,7 @@ extern crate crypto;
 
 use std::str;
 
-use base64::{encode, decode};
+use base64::{encode};
 
 use time;
 
@@ -37,27 +40,25 @@ pub fn get_time()->String{
 }
 
 //encrypt token
-pub fn get_token()->String{
+pub fn get_token()->AuthToken{
     let message = get_time();
-    println!("{}",message);
     let encrypted_data = crypt_model::encrypt(message.as_bytes(), &KEY, &IV).ok().unwrap();
-    let test_vec = crypt_model::encrypt(message.as_bytes(), &KEY, &IV).ok().unwrap();
-    println!("{}",parse_token(encode(&test_vec)));
-    println!("{}",check_token(encode(&test_vec)));
-    let res = JsonResult{errno:0,errmsg:"success".to_string(), data:AuthToken{timestr:message,token:encode(encrypted_data)} };
-    serde_json::to_string(&res).unwrap()
+    // let test_vec = crypt_model::encrypt(message.as_bytes(), &KEY, &IV).ok().unwrap();
+    // println!("{}",check_token(&test_vec));
+    AuthToken{timestr:message,token:encode(encrypted_data)}
 }
 
 //decrypt token
-pub fn parse_token(str:String)->String{
-    let vec_u8 = &decode(str).unwrap()[..];
+pub fn parse_token(res:&[u8])->String{
+    // let vec_u8 = &decode(str).unwrap()[..];
+    let vec_u8 = res;
     let decrypted_data =  crypt_model::decrypt(&vec_u8[..], &KEY, &IV).ok().unwrap();
     String::from_utf8(decrypted_data).unwrap()
 }
 
 //check token is out time or not
-pub fn check_token(str:String)->bool{
-    let time = parse_token(str).parse::<i64>().unwrap();
+pub fn check_token(res:&[u8])->bool{
+    let time = parse_token(res).parse::<i64>().unwrap();
     let now = get_time().parse::<i64>().unwrap();
     if time <= now  {true}else{false}
 }

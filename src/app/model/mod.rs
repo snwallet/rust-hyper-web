@@ -1,8 +1,10 @@
-pub mod test_model;
 
 pub mod crypt_model;
 
 pub mod help_model;
+
+pub mod user_model;
+
 
 
 
