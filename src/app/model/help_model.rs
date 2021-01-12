@@ -35,7 +35,7 @@ pub struct AuthToken {
 //get now timestamp
 pub fn get_time()->String{
     let timespec = time::get_time();
-    let timestr = (timespec.sec + 600) * 1000 + (timespec.nsec as f64 / 1000.0 / 1000.0) as i64;
+    let timestr = (timespec.sec + 60) * 1000 + (timespec.nsec as f64 / 1000.0 / 1000.0) as i64;
     timestr.to_string()
 }
 
@@ -60,5 +60,7 @@ pub fn parse_token(res:&[u8])->String{
 pub fn check_token(res:&[u8])->bool{
     let time = parse_token(res).parse::<i64>().unwrap();
     let now = get_time().parse::<i64>().unwrap();
+    println!("{:?}",time);
+    println!("{:?}",now);
     if time <= now  {true}else{false}
 }
