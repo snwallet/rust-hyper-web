@@ -41,7 +41,7 @@ fn check_response(mp:&HeaderMap,str:String)->Result<Response<Body>, hyper::Error
         if help_model::check_token(&decode(token).unwrap()[..]) {
             string_response(str)
         }else{
-            nodata_response(-1,"param error".to_string())
+            nodata_response(-1,"token error".to_string())
         }
     }else{
         nodata_response(-1,"param error".to_string())
@@ -133,20 +133,29 @@ pub async fn apps(req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
     let res = JsonResult{
         errno: 0,
         errmsg: "success".to_string(),
-        data:crate::app::model::user_model::select()
+        data:crate::app::model::apps_model::select()
     };
     let json = serde_json::to_string(&res).unwrap();
     check_response(hd,json)
 }
 
 pub async fn register(req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
-    let hd = req.headers();
-    // println!("{:?}",hd);
-    let res = JsonResult{
-        errno: 0,
-        errmsg: "success".to_string(),
-        data:crate::app::model::help_model::get_token()
-    };
-    let json = serde_json::to_string(&res).unwrap();
-    check_response(hd,json)
+    let hd = Request::headers(&req);
+    // let b = hyper::body::to_bytes(&req).await?;
+    // println!("{:?}",b);
+    // let params = form_urlencoded::parse(b.as_ref())
+    //     .into_owned()
+    //     .collect::<HashMap<String, String>>();
+    // println!("{:?}",params);
+        let ip = "192.168.0.1".to_string();
+        let res = JsonResult{
+            errno: 0,
+            errmsg: "success".to_string(),
+            data:crate::app::model::user_model::_insert("0x21312312".to_string(),ip)
+        };
+        let json = serde_json::to_string(&res).unwrap();
+        check_response(hd,json)
+
+
+
 }

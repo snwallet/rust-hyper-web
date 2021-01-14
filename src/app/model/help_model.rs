@@ -39,6 +39,13 @@ pub fn get_time()->String{
     timestr.to_string()
 }
 
+pub fn get_now()->String{
+    let timespec = time::get_time();
+    let timestr = timespec.sec * 1000 + (timespec.nsec as f64 / 1000.0 / 1000.0) as i64;
+    timestr.to_string()
+}
+
+
 //encrypt token
 pub fn get_token()->AuthToken{
     let message = get_time();
@@ -59,8 +66,8 @@ pub fn parse_token(res:&[u8])->String{
 //check token is out time or not
 pub fn check_token(res:&[u8])->bool{
     let time = parse_token(res).parse::<i64>().unwrap();
-    let now = get_time().parse::<i64>().unwrap();
-    println!("{:?}",time);
-    println!("{:?}",now);
-    if time <= now  {true}else{false}
+    let now = get_now().parse::<i64>().unwrap();
+    // println!("{:?}",time);
+    // println!("{:?}",now);
+    if time >= now  {true}else{false}
 }

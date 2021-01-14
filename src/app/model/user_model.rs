@@ -3,34 +3,31 @@ use mysql::*;
 use mysql::prelude::*;
 use serde::{Serialize, Deserialize};
 
-// use super::super::model;
+use super::super::db_conn;
 
 #[derive(Debug, PartialEq, Eq,Serialize, Deserialize)]
 pub struct User {
     id: i32,
-    name:String,
+    wallet:String,
 }
 
-fn db_conn() -> PooledConn {
-    let dsn = String::from("mysql://root:root@127.0.0.1:3306/test");
-    let pool = Pool::new(dsn).unwrap();
-    pool.get_conn().unwrap()
-}
 
-// pub fn insert() {
-//     let mut conn = db_conn();
-//
-//     let ret = "insert into user(name,pwd)values(?,?)".with((1,2)).run(&mut conn).unwrap();
-//     println!("insert id:{:?}",ret.last_insert_id().unwrap());
-// }
 
-pub fn select()->Vec<User>{
+pub fn _insert(address:String, ip:String) -> u64 {
     let mut conn = db_conn();
 
-    let ret = "select id,name from user".map(&mut conn,|(id,name)|{
+    let ret = "insert into user(wallet,first_id)values(?,?)".with((address,ip)).run(&mut conn).unwrap();
+    println!("insert id:{:?}",ret.last_insert_id().unwrap());
+    ret.last_insert_id().unwrap()
+}
+
+pub fn _select()->Vec<User>{
+    let mut conn = db_conn();
+
+    let ret = "select id,wallet from user".map(&mut conn,|(id,wallet)|{
         User{
-            id:id,
-            name:name,
+            id,
+            wallet,
         }
     }).unwrap();
     println!("{:?}",ret);

@@ -8,6 +8,16 @@ use hyper::{Body, Method, Request, Response,};
 
 use crate::app::controller::post_controller::*;
 
+
+use mysql::{PooledConn, Pool};
+
+pub fn db_conn() -> PooledConn {
+    let dsn = String::from("mysql://root:root@192.168.0.123:3306/test");
+    let pool = Pool::new(dsn).unwrap();
+    pool.get_conn().unwrap()
+}
+
+
 pub async fn router(req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
 
     match (req.method(), req.uri().path()) {
