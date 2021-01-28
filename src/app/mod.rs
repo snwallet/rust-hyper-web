@@ -27,14 +27,16 @@ pub async fn router(req: Request<Body>) -> Result<Response<Body>, hyper::Error> 
     }else{
         if let Some(token) = req.headers().get("token") {
             if help_model::check_token(&decode(token).unwrap()[..]) {
-                
+                match (req.method(), req.uri().path()) {
+                    (&Method::POST, "/test") => test_post(req).await,
+                    _ => nofound(),
+                }
             }else{
-               return nofound();
+               return nodata_response(-1,"token error".to_string());
             }
+        }else{
+            return nodata_response(-1,"token error".to_string());
         }
-        match (req.method(), req.uri().path()) {
-            (&Method::POST, "/test") => test_post(req).await,
-            _ => nofound(),
-        }
+        
     }
 }

@@ -1,13 +1,10 @@
-#![deny(warnings)]
 
 // use futures_util::TryStreamExt;
-use hyper::{Body, Request, Response, StatusCode, header, HeaderMap};
+use hyper::{Body, Request, Response, StatusCode, header};
 
 use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
 use url::form_urlencoded;
-use crate::app::model::help_model;
-use base64::{decode};
 
 #[derive(Serialize, Deserialize)]
 struct JsonResult<T> { errmsg:String, data:T, errno:i8 }
@@ -23,7 +20,7 @@ fn string_response(str:String)->Result<Response<Body>, hyper::Error>{
 }
 
 
- fn nodata_response(number:i8,msg:String)->Result<Response<Body>, hyper::Error>{
+pub fn nodata_response(number:i8,msg:String)->Result<Response<Body>, hyper::Error>{
     let res =  JsonResult{
         errno:number,
         errmsg: msg,
@@ -36,17 +33,7 @@ fn string_response(str:String)->Result<Response<Body>, hyper::Error>{
            .body(Body::from(json)).unwrap())
 }
 
-fn check_response(mp:&HeaderMap,str:String)->Result<Response<Body>, hyper::Error>{
-    if let Some(token) = mp.get("token") {
-        if help_model::check_token(&decode(token).unwrap()[..]) {
-            string_response(str)
-        }else{
-            nodata_response(-1,"token error".to_string())
-        }
-    }else{
-        nodata_response(-1,"param error".to_string())
-    }
-}
+
 
 // 404
 pub fn nofound() -> Result<Response<Body>, hyper::Error>{
@@ -55,24 +42,19 @@ pub fn nofound() -> Result<Response<Body>, hyper::Error>{
 
 //post param as json
 pub async fn test_post(req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
-    let hd = req.headers();
-    println!("{:?}",hd);
-    println!("{:?}",req);
-
-    // let b = hyper::body::to_bytes(req).await?;
-    // let params = form_urlencoded::parse(b.as_ref())
-    //     .into_owned()
-    //     .collect::<HashMap<String, String>>();
-    // println!("{:?}",params);
-
+    let b = hyper::body::to_bytes(req).await?;
+    let params = form_urlencoded::parse(b.as_ref())
+        .into_owned()
+        .collect::<HashMap<String, String>>();
+    println!("{:?}",params);
 
     let res = JsonResult{
         errno: 0,
         errmsg: "success".to_string(),
-        data:crate::app::model::help_model::get_token()
+        data:params
     };
     let json = serde_json::to_string(&res).unwrap();
-    check_response(hd,json)
+    string_response(json)
 }
 
 //get a token
