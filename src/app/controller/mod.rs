@@ -1,2 +1,1 @@
-pub mod post_controller;
-
+pub mod test_controller;

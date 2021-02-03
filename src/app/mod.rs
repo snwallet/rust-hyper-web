@@ -1,42 +1,28 @@
 #![deny(warnings)]
 
 mod controller;
-
 mod model;
+mod lib;
 
-use hyper::{Body, Method, Request, Response,};
+use crate::app::controller::*;
 
-use crate::app::controller::post_controller::*;
-use crate::app::model::*;
-
-use base64::{decode};
-
-// use mysql::{PooledConn, Pool};
-
-// pub fn db_conn() -> PooledConn {
-//     let dsn = String::from("mysql://root:root@192.168.0.123:3306/carpark");
-//     let pool = Pool::new(dsn).unwrap();
-//     pool.get_conn().unwrap()
-// }
+use std::{net::SocketAddr};
+use hyper::{Body, Request, Response, Server, Method, StatusCode};
+use hyper::service::{make_service_fn, service_fn};
 
 
-pub async fn router(req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
 
-    if req.uri() == "/get_token" {
-        return get_token(req).await;
-    }else{
-        if let Some(token) = req.headers().get("token") {
-            if help_model::check_token(&decode(token).unwrap()[..]) {
-                match (req.method(), req.uri().path()) {
-                    (&Method::POST, "/test") => test_post(req).await,
-                    _ => nofound(),
-                }
-            }else{
-               return nodata_response(-1,"token error".to_string());
-            }
-        }else{
-            return nodata_response(-1,"token error".to_string());
-        }
-        
+async fn router(req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
+    match (req.method(), req.uri().path()) {
+        (&Method::POST, "/test") => test_controller::main(req).await,
+        _ => Ok(Response::builder().status(StatusCode::NOT_FOUND).body(Body::from("".to_string())).unwrap()),
     }
+}
+
+pub async fn run(port:u16) {
+    let addr = SocketAddr::from(([127, 0, 0, 1], port));
+    let make_svc = make_service_fn(|_conn| async { Ok::<_, hyper::Error>(service_fn(router)) });
+    let server = Server::bind(&addr).serve(make_svc);
+    println!("server run at http://127.0.0.1:{}",port);
+    if let Err(e) = server.await { eprintln!("server error: {}", e); }
 }
