@@ -15,6 +15,8 @@ use hyper::service::{make_service_fn, service_fn};
 async fn router(req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
     match (req.method(), req.uri().path()) {
         (&Method::POST, "/test") => test_controller::main(req).await,
+        (&Method::POST, "/param") => param_controller::main(req).await,
+        (&Method::GET, "/file")  => file_controller::main(req).await,
         _ => Ok(Response::builder().status(StatusCode::NOT_FOUND).body(Body::from("".to_string())).unwrap()),
     }
 }
