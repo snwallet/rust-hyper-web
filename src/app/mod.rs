@@ -14,12 +14,13 @@ use hyper::service::{make_service_fn, service_fn};
 async fn router(req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
     let url_path = req.uri().path();
     let url_method = req.method();
-    //static file
+    //static file (src/public/html/1.html)
     if file_controller::check_static_url(url_path) {
         file_controller::main(file_controller::get_static_url(url_path)).await
     } else {
         // post or get
         match (url_method, url_path) {
+            (&Method::POST, "/upload") => upload_controller::main(req).await,
             (&Method::POST, "/test") => test_controller::main(req).await,
             (&Method::POST, "/param") => param_controller::main(req).await,
             _ => Ok(Response::builder().status(StatusCode::NOT_FOUND).body(Body::from("".to_string())).unwrap()),
