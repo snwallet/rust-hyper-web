@@ -6,7 +6,7 @@ use tokio_util::codec::{BytesCodec, FramedRead};
 
 pub async fn main(_url:&str) -> Result<Response<Body>, hyper::Error> {
     let url = format!("{}{}","src/app/public/",_url.to_string());
-    println!("{}",url);
+    info!("{}",url);
     if let Ok(file) = File::open(url).await {
         let stream = FramedRead::new(file, BytesCodec::new());
         let body = Body::wrap_stream(stream);
